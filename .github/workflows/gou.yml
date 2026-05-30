@@ -1,0 +1,42 @@
+name: Build Voxy (Forge 1.20.1 - mc_1201)
+
+on: 
+  workflow_dispatch: # 依然保留手动触发，方便随时打包
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出目标代码 (分支: mc_1201)
+        uses: actions/checkout@v4
+        with:
+          repository: 'm3t4f1v3/voxy'
+          ref: 'mc_1201'
+          fetch-depth: 0 
+
+      - name: 配置 JDK 21 环境
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 配置 Gradle 缓存
+        uses: gradle/actions/setup-gradle@v4
+        
+      - name: 赋予 gradlew 执行权限
+        run: chmod +x ./gradlew
+
+      - name: 执行 Gradle 构建
+        run: ./gradlew build --no-daemon
+
+      - name: 提取并上传 Jar 包
+        uses: actions/upload-artifact@v4
+        with:
+          name: Voxy-Forge-1.20.1-mc_1201-Build
+          path: |
+            **/build/libs/*.jar
+            !**/build/libs/*-sources.jar
+            !**/build/libs/*-dev.jar
+            !**/build/libs/*-javadoc.jar
+
